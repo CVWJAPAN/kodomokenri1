@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ヒーロー・レスキュー - 子どもの権利編（深掘り版）</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+        }
+        #welcome-screen, #game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            text-align: left;
+        }
+        #game-container {
+            display: none;
+        }
+        #welcome-screen h1, #game-container h1 {
+            color: #4CAF50;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .option {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .option:hover {
+            background-color: #006d93;
+        }
+        #feedback {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        #points {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="points">ヒーローポイント: <span id="score">0</span></div>
+    <div id="welcome-screen">
+        <h1>ヒーロー・レスキューへようこそう！</h1>
+        <p>このゲームでは、子どもの権利について深く学び、大人の都合に振り回されない方法を考えるよ！</p>
+        <p><strong>遊び方：</strong>質問を読んで、正しい選択肢を選んでね。自分の権利を大切にしよう！</p>
+        <p><strong>なぜ大切？：</strong>子どもの権利を知ることで、安全に楽しく生きられるよ！</p>
+        <button id="start-button" class="button">ゲームを始める</button>
+    </div>
+    <div id="game-container">
+        <h1>ヒーロー・レスキュー - 子どもの権利編（深掘り版）</h1>
+        <p id="game-text">状況を考えてみよう！</p>
+        <div id="options"></div>
+        <div id="feedback"></div>
+        <button id="next-button" class="button" style="display: none;">次へ</button>
+    </div>
+
+    <script>
+        let stage = 1;
+        let points = 0;
+
+        const stages = {
+            1: {
+                text: "友達が『学校に行きたくない』と言っている。でも親に『行け』と無理やり言われた。友達にはどんな権利がある？",
+                options: [
+                    { text: "学校に行かなくていい権利", correct: false },
+                    { text: "自分の意見を聞いてもらう権利", correct: true },
+                    { text: "親の言うことを聞く義務", correct: false }
+                ],
+                feedback: {
+                    correct: "正しい！子どもの権利条約では、自分の意見を言う権利があるよ（第12条）。ヒーローポイント+5！",
+                    incorrect: "それは違うかも。子どもには意見を聞いてもらう権利があるんだよ。"
+                }
+            },
+            2: {
+                text: "離れているお父さんに会いたいけど、会わせてもらえない。子どもの権利として認められる？",
+                options: [
+                    { text: "ううん、それは権利じゃない", correct: false },
+                    { text: "はい、親と一緒に過ごす権利があるよ", correct: true },
+                    { text: "分からない", correct: false }
+                ],
+                feedback: {
+                    correct: "その通り！子どもの権利条約では、親と一緒に過ごす権利があるよ（第9条）。ヒーローポイント+5！",
+                    incorrect: "それは違うよ。子どもの権利には、親に会う権利もあるんだ。"
+                }
+            },
+            3: {
+                text: "学校でいじめられているけど、先生に言っても何も変わらない。どんな権利が守られていない？",
+                options: [
+                    { text: "遊ぶ権利", correct: false },
+                    { text: "安全に暮らす権利", correct: true },
+                    { text: "勉強しない権利", correct: false }
+                ],
+                feedback: {
+                    correct: "やった！子どもの権利条約では、暴力から守られる権利があるよ（第19条）。ヒーローポイント+5！",
+                    incorrect: "それは違うかも。いじめは安全に暮らす権利を奪う行為だよ。"
+                }
+            },
+            4: {
+                text: "病院に行きたいけど、お金がないから行けないと言われた。どんな権利が守られていない？",
+                options: [
+                    { text: "健康を守る権利", correct: true },
+                    { text: "毎日遊ぶ権利", correct: false },
+                    { text: "親に従う権利", correct: false }
+                ],
+                feedback: {
+                    correct: "正しい！子どもの権利条約では、健康を守る権利があるよ（第24条）。ヒーローポイント+5！",
+                    incorrect: "それは違うよ。子どもには病院に行って健康を守る権利があるんだ。"
+                }
+            },
+            5: {
+                text: "親が『自分の都合だから学校を休ませる』と言ってきた。子どもの権利はどうなる？",
+                options: [
+                    { text: "親の都合が優先される", correct: false },
+                    { text: "教育を受ける権利が守られない", correct: true },
+                    { text: "何も問題ない", correct: false }
+                ],
+                feedback: {
+                    correct: "正しい！子どもの権利条約では、教育を受ける権利（第28条）が大切だよ。ヒーローポイント+5！",
+                    incorrect: "それは違うよ。親の都合だけで学校を休むのは、子どもの権利を無視することになるんだ。"
+                }
+            },
+            6: {
+                text: "親の都合だけ押し付けられたとき、どうすればいい？",
+                options: [
+                    { text: "我慢して従う", correct: false },
+                    { text: "信頼できる大人や相談窓口に助けを求める", correct: true },
+                    { text: "一人で親と戦う", correct: false }
+                ],
+                feedback: {
+                    correct: "すごい！子どもの権利を守るために、信頼できる大人に相談しよう（第12条、第37条）。ヒーローポイント+10！",
+                    incorrect: "それは危険だよ。信頼できる大人や専門家に助けを求めようね。"
+                }
+            }
+        };
+
+        function updateGame() {
+            const currentStage = stages[stage];
+            document.getElementById("game-text").innerText = currentStage.text;
+            document.getElementById("feedback").innerText = "";
+            document.getElementById("next-button").style.display = "none";
+
+            const optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+            currentStage.options.forEach(option => {
+                const button = document.createElement("div");
+                button.className = "option";
+                button.innerText = option.text;
+                button.onclick = () => checkAnswer(option.correct, currentStage.feedback);
+                optionsDiv.appendChild(button);
+            });
+        }
+
+        function checkAnswer(isCorrect, feedback) {
+            const feedbackDiv = document.getElementById("feedback");
+            feedbackDiv.innerText = isCorrect ? feedback.correct : feedback.incorrect;
+            if (isCorrect) {
+                points += stage === 6 ? 10 : 5;
+                document.getElementById("score").innerText = points;
+            }
+            document.getElementById("next-button").style.display = "block";
+            document.getElementById("options").innerHTML = "";
+        }
+
+        document.getElementById("start-button").onclick = () => {
+            document.getElementById("welcome-screen").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+            updateGame();
+        };
+
+        document.getElementById("next-button").onclick = () => {
+            stage++;
+            if (stage > 6) {
+                document.getElementById("game-text").innerText = "ミッションクリア！子どもの権利をしっかり守れたよ！";
+                document.getElementById("options").innerHTML = "";
+                document.getElementById("feedback").innerText = `最終スコア: ${points}ポイント！もう一度遊ぶ？`;
+                document.getElementById("next-button").innerText = "もう一度遊ぶ";
+                document.getElementById("next-button").onclick = () => {
+                    stage = 1;
+                    points = 0;
+                    document.getElementById("score").innerText = points;
+                    document.getElementById("next-button").innerText = "次へ";
+                    updateGame();
+                };
+            } else {
+                updateGame();
+            }
+        };
+
+        // ゲーム開始時に初期化
+        updateGame();
+    </script>
+</body>
+      </html>
